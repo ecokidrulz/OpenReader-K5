@@ -6,6 +6,8 @@ SCRIPT_DIR="$(dirname "$0")"
 FBINK="/mnt/us/koreader/fbink"
 TOUCH_READER="$SCRIPT_DIR/touch_reader"
 [ ! -f "$FBINK" ] && FBINK="/usr/bin/fbink"
+OPENREADER_K5_VERSION="0.1.0"
+
 
 # Global state variables
 FRONTLIGHT_ENABLED=0
@@ -152,60 +154,66 @@ draw_menu() {
     SELECTED=$1
 
     $FBINK -c
-    $FBINK -x 2 -y 3 -h "OPENREADER"
-    CURRENT_TIME=$(date "+%H:%M")
-    $FBINK -x 31 -y 3 "$CURRENT_TIME"
-    $FBINK -x 2 -y 5 "Kindle Touch / K5"
-    $FBINK -x 2 -y 7 "──────────────────────────────────"
+
+    # Header: TALL size 2, shifted right and highlighted.
+    $FBINK -x 2 -y 1 -F TALL -S 2 -h "OPENREADER-K5"
+
+    $FBINK -x 2 -y 6 "──────────────────────────────────"
 
     if [ "$SELECTED" = "1" ]; then
-        $FBINK -x 2 -y 14 -h "KOReader"
+        $FBINK -x 2 -y 6 -F TALL -S 2 -h "KOReader"
     else
-        $FBINK -x 2 -y 14 "KOReader"
+        $FBINK -x 2 -y 6 -F TALL -S 2 "KOReader"
     fi
 
     if [ "$SELECTED" = "2" ]; then
-        $FBINK -x 2 -y 22 -h "System Info"
+        $FBINK -x 2 -y 9 -F TALL -S 2 -h "Display Clock"
     else
-        $FBINK -x 2 -y 22 "System Info"
+        $FBINK -x 2 -y 9 -F TALL -S 2 "Display Clock"
     fi
 
     if [ "$SELECTED" = "3" ]; then
-        $FBINK -x 2 -y 30 -h "Boot KindleOS Once"
+        $FBINK -x 2 -y 12 -F TALL -S 2 -h "System Info"
     else
-        $FBINK -x 2 -y 30 "Boot KindleOS Once"
+        $FBINK -x 2 -y 12 -F TALL -S 2 "System Info"
     fi
 
     if [ "$SELECTED" = "4" ]; then
-        $FBINK -x 2 -y 38 -h "Reboot"
+        $FBINK -x 2 -y 15 -F TALL -S 2 -h "Boot KindleOS Once"
     else
-        $FBINK -x 2 -y 38 "Reboot"
+        $FBINK -x 2 -y 15 -F TALL -S 2 "Boot KindleOS Once"
+    fi
+
+    if [ "$SELECTED" = "5" ]; then
+        $FBINK -x 2 -y 18 -F TALL -S 2 -h "Reboot"
+    else
+        $FBINK -x 2 -y 18 -F TALL -S 2 "Reboot"
     fi
 
     $FBINK -x 2 -y 43 "──────────────────────────────────"
 
     if [ "$SELECTED" = "toolbar_refresh" ]; then
-        $FBINK -x 1 -y 45 -h "Refresh"
+        $FBINK -x 2 -y 22 -F TERMINUSB -S 2 -h "Refresh"
     else
-        $FBINK -x 1 -y 45 "Refresh"
+        $FBINK -x 2 -y 22 -F TERMINUSB -S 2 "Refresh"
     fi
 
     if [ "$SELECTED" = "toolbar_usbnet" ]; then
-        $FBINK -x 12 -y 45 -h "Net"
+        $FBINK -x 11 -y 22 -F TERMINUSB -S 2 -h "Net"
     else
-        $FBINK -x 12 -y 45 "Net"
+        $FBINK -x 11 -y 22 -F TERMINUSB -S 2 "Net"
     fi
 
     if [ "$SELECTED" = "toolbar_usbstorage" ]; then
-        $FBINK -x 19 -y 45 -h "Storage"
+        $FBINK -x 18 -y 22 -F TERMINUSB -S 2 -h "Storage"
     else
-        $FBINK -x 19 -y 45 "Storage"
+        $FBINK -x 18 -y 22 -F TERMINUSB -S 2 "Storage"
     fi
 
     if [ "$SELECTED" = "toolbar_poweroff" ]; then
-        $FBINK -x 30 -y 45 -h "Off"
+        $FBINK -x 29 -y 22 -F TERMINUSB -S 2 -h "Off"
     else
-        $FBINK -x 30 -y 45 "Off"
+        $FBINK -x 29 -y 22 -F TERMINUSB -S 2 "Off"
     fi
 }
 
@@ -216,13 +224,15 @@ get_button_from_coords() {
     X=$((RAW_X * 600 / 4095))
     Y=$((RAW_Y * 800 / 4095))
 
-    # Bottom toolbar: four equal 150 px zones.
+    # Bottom toolbar: shifted slightly right to align with labels.
     if [ "$Y" -ge 690 ]; then
-        if [ "$X" -lt 150 ]; then
+        if [ "$X" -lt 20 ]; then
+            echo "unknown"
+        elif [ "$X" -lt 165 ]; then
             echo "toolbar_refresh"
-        elif [ "$X" -lt 300 ]; then
+        elif [ "$X" -lt 310 ]; then
             echo "toolbar_usbnet"
-        elif [ "$X" -lt 450 ]; then
+        elif [ "$X" -lt 455 ]; then
             echo "toolbar_usbstorage"
         else
             echo "toolbar_poweroff"
@@ -231,16 +241,18 @@ get_button_from_coords() {
     fi
 
     # Four main menu regions.
-    if [ "$Y" -lt 220 ]; then
+    if [ "$Y" -lt 175 ]; then
         echo "unknown"
-    elif [ "$Y" -lt 335 ]; then
+    elif [ "$Y" -lt 270 ]; then
         echo "1"
-    elif [ "$Y" -lt 450 ]; then
+    elif [ "$Y" -lt 365 ]; then
         echo "2"
-    elif [ "$Y" -lt 570 ]; then
+    elif [ "$Y" -lt 460 ]; then
         echo "3"
-    elif [ "$Y" -lt 690 ]; then
+    elif [ "$Y" -lt 575 ]; then
         echo "4"
+    elif [ "$Y" -lt 690 ]; then
+        echo "5"
     else
         echo "unknown"
     fi
@@ -248,6 +260,7 @@ get_button_from_coords() {
 
 # Show system info (with ASCII banner)
 show_system_info() {
+    echo "INFO" > /var/tmp/openreader-screen
     $FBINK -c
     
     # Kindle figlet banner - moved down with more spacing
@@ -264,38 +277,56 @@ show_system_info() {
     UPTIME=$(uptime | awk '{print $3}' | sed 's/,//')
     MEMORY=$(free -m | awk 'NR==2{printf "%.0f/%.0f MB", $3,$2}')
     STORAGE=$(df -h /mnt/us | tail -n 1 | awk '{print $3" / "$2" ("$5")"}')
-    
-    # Battery info
-    if [ -f /sys/class/power_supply/bd71827_bat/capacity ]; then
-        BATTERY=$(cat /sys/class/power_supply/bd71827_bat/capacity 2>/dev/null || echo "N/A")
-        BATTERY="$BATTERY%"
+
+    # Software versions
+    FIRMWARE="$(awk 'NR==1 {print $2}' /etc/prettyversion.txt 2>/dev/null)"
+    [ -n "$FIRMWARE" ] || FIRMWARE="N/A"
+
+    if [ -f /mnt/us/koreader/git-rev ]; then
+        KOREADER_VERSION="$(cat /mnt/us/koreader/git-rev 2>/dev/null)"
     else
-        BATTERY="N/A"
+        KOREADER_VERSION="N/A"
+    fi
+
+    LAUNCHER_VERSION="OpenReader-K5 v${OPENREADER_K5_VERSION}"
+    
+    # Battery info from Kindle powerd.
+    BATTERY_LEVEL="$(lipc-get-prop com.lab126.powerd battLevel 2>/dev/null)"
+    CHARGING="$(lipc-get-prop com.lab126.powerd isCharging 2>/dev/null)"
+
+    case "$BATTERY_LEVEL" in
+        ''|*[!0-9]*)
+            BATTERY="N/A"
+            ;;
+        *)
+            BATTERY="${BATTERY_LEVEL}%"
+            ;;
+    esac
+
+    if [ "$CHARGING" = "1" ] && [ "$BATTERY" != "N/A" ]; then
+        BATTERY="${BATTERY} (charging)"
     fi
     
-    # Display system information with spacing
-    $FBINK -y 16 -pm ""
-    $FBINK -y 17 -pm "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    $FBINK -y 19 -pm "Device:  Kindle $MODEL"
-    $FBINK -y 20 -pm "Kernel:  $KERNEL"
-    $FBINK -y 21 -pm "Battery: $BATTERY"
-    $FBINK -y 23 -pm "Uptime:  $UPTIME"
-    $FBINK -y 24 -pm "Memory:  $MEMORY"
-    $FBINK -y 25 -pm "Storage: $STORAGE"
-    $FBINK -y 27 -pm "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    $FBINK -y 28 -pm "Touch anywhere to return..."
-    
+    # Display system information - left justified
+    $FBINK -x 2 -y 16 ""
+    $FBINK -x 2 -y 17 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    $FBINK -x 2 -y 19 "Device:   Kindle $MODEL"
+    $FBINK -x 2 -y 20 "Firmware: $FIRMWARE"
+    $FBINK -x 2 -y 21 "Launcher: $LAUNCHER_VERSION"
+    $FBINK -x 2 -y 22 "KOReader: $KOREADER_VERSION"
+    $FBINK -x 2 -y 23 "Kernel:   $KERNEL"
+    $FBINK -x 2 -y 24 "Battery:  $BATTERY"
+    $FBINK -x 2 -y 26 "Uptime:   $UPTIME"
+    $FBINK -x 2 -y 27 "Memory:   $MEMORY"
+    $FBINK -x 2 -y 28 "Storage:  $STORAGE"
+    $FBINK -x 2 -y 30 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    $FBINK -x 2 -y 31 "Touch anywhere to return..."
     # Wait for touch
     "$TOUCH_READER" /dev/input/event3 2>/dev/null >/dev/null
 }
 
 # Settings menu (EXACT UI MATCH to main menu for coordinate reuse)
 show_settings() {
-    # Clear any final boot-animation text written after OpenReader starts.
-    (
-        sleep 3
-        /mnt/us/extensions/openReader/bin/redraw-openreader.sh
-    ) &
 
     while true; do
         $FBINK -c
@@ -464,10 +495,15 @@ show_settings() {
                 sleep 0.2
                 ;;
             2)
+                /mnt/us/extensions/openReader/bin/display-clock.sh
+                CURRENT_SELECTION=""
+                ;;
+
+            3)
                 # Button 2: Open Network Manager
                 show_network_manager
                 ;;
-            3)
+            4)
                 # Button 3: Boot to KindleOS Once / Reboot
                 if [ "$OPENREADER_BOOT_MODE" = "1" ]; then
                     # Boot mode: Set flag and reboot to KindleOS once
@@ -498,7 +534,7 @@ show_settings() {
                     /sbin/reboot -f
                 fi
                 ;;
-            4)
+            5)
                 # Button 4: Power Off
                 $FBINK -c
                 $FBINK -y 12 -pmh "⚠️  POWERING OFF..."
@@ -654,11 +690,6 @@ toggle_wifi() {
 
 # Network Manager UI (EXACT UI MATCH for coordinate reuse)
 show_network_manager() {
-    # Clear any final boot-animation text written after OpenReader starts.
-    (
-        sleep 3
-        /mnt/us/extensions/openReader/bin/redraw-openreader.sh
-    ) &
 
     while true; do
         $FBINK -c
@@ -783,11 +814,16 @@ show_network_manager() {
                 continue
                 ;;
             2)
+                /mnt/us/extensions/openReader/bin/display-clock.sh
+                CURRENT_SELECTION=""
+                ;;
+
+            3)
                 # Button 2: Enable/Disable WiFi
                 toggle_wifi
                 sleep 1
                 ;;
-            3)
+            4)
                 # Button 3: Scan for Networks
                 $FBINK -c
                 $FBINK -y 15 -pmh "Scanning for networks..."
@@ -802,7 +838,7 @@ show_network_manager() {
                 $FBINK -y 18 -pm "Scan complete! Refreshing..."
                 sleep 1
                 ;;
-            4)
+            5)
                 # Button 4: Reconnect
                 if [ "$WIFI_ENABLED" = "1" ]; then
                     $FBINK -c
@@ -902,11 +938,6 @@ confirm_boot_kindleos_once() {
     $FBINK -x 2 -y 28 "Boot KindleOS"
     $FBINK -x 2 -y 36 "Cancel"
 
-    # Clear any final boot-animation text written after OpenReader starts.
-    (
-        sleep 3
-        /mnt/us/extensions/openReader/bin/redraw-openreader.sh
-    ) &
 
     while true; do
         COORDS=$("$TOUCH_READER" /dev/input/event3 2>/dev/null)
@@ -933,6 +964,7 @@ confirm_boot_kindleos_once() {
 
 # Confirmation dialog: reboot OpenReader
 confirm_reboot() {
+    echo "CONFIRM" > /var/tmp/openreader-screen
     $FBINK -c
 
     $FBINK -x 2 -y 6 -h "REBOOT"
@@ -946,11 +978,6 @@ confirm_reboot() {
     $FBINK -x 2 -y 28 "Reboot"
     $FBINK -x 2 -y 36 "Cancel"
 
-    # Clear any final boot-animation text written after OpenReader starts.
-    (
-        sleep 3
-        /mnt/us/extensions/openReader/bin/redraw-openreader.sh
-    ) &
 
     while true; do
         COORDS=$("$TOUCH_READER" /dev/input/event3 2>/dev/null)
@@ -982,6 +1009,8 @@ boot_kindleos_once() {
 
     echo "KINDLEOS" > /var/tmp/openreader-state
 
+    /mnt/us/extensions/openReader/bin/timekeeper.sh checkpoint 2>/dev/null || true
+
     rm -f /mnt/us/BOOT_KINDLEOS.used
     touch /mnt/us/BOOT_KINDLEOS
 
@@ -998,6 +1027,8 @@ reboot_system() {
     $FBINK -x 2 -y 15 -h "Rebooting..."
 
     echo "REBOOT" > /var/tmp/openreader-state
+
+    /mnt/us/extensions/openReader/bin/timekeeper.sh checkpoint 2>/dev/null || true
     trap - INT TERM EXIT
 
     sync
@@ -1015,6 +1046,8 @@ poweroff_system() {
     $FBINK -x 8 -y 19 "~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
     echo "POWEROFF" > /var/tmp/openreader-state
+
+    /mnt/us/extensions/openReader/bin/timekeeper.sh checkpoint 2>/dev/null || true
     trap - INT TERM EXIT
 
     sync
@@ -1069,6 +1102,12 @@ main() {
     stop_services
     get_screen_size
 
+    # Old Kindle firmware can restore stale wall-clock time automatically.
+    lipc-set-prop com.lab126.system disableTimeAutoUpdate x 2>/dev/null || true
+
+    # Maintain the top-right launcher clock without full-screen redraws.
+    /usr/bin/setsid /mnt/us/extensions/openReader/bin/clock-updater.sh </dev/null >/dev/null 2>&1 &
+
     CURRENT_SELECTION=""
 
     # Do not restore services during intentional KOReader/KTerm handoff.
@@ -1080,7 +1119,9 @@ main() {
         /mnt/us/extensions/openReader/bin/redraw-openreader.sh
     ) &
 
+
     while true; do
+        echo "MAIN" > /var/tmp/openreader-screen
         draw_menu "$CURRENT_SELECTION"
 
 
@@ -1129,7 +1170,7 @@ main() {
 
         # Main menu buttons: 1 second feedback.
         case "$BUTTON" in
-            1|2|3|4)
+            1|2|3|4|5)
                 CURRENT_SELECTION="$BUTTON"
                 draw_menu "$CURRENT_SELECTION"
                 sleep 1
@@ -1142,16 +1183,21 @@ main() {
                 ;;
 
             2)
-                show_system_info
+                /mnt/us/extensions/openReader/bin/display-clock.sh
                 CURRENT_SELECTION=""
                 ;;
 
             3)
-                confirm_boot_kindleos_once
+                show_system_info
                 CURRENT_SELECTION=""
                 ;;
 
             4)
+                confirm_boot_kindleos_once
+                CURRENT_SELECTION=""
+                ;;
+
+            5)
                 confirm_reboot
                 CURRENT_SELECTION=""
                 ;;

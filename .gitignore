@@ -1,0 +1,18 @@
+# Release/build artifacts
+*.tar.gz
+*.tar.gz.sha256
+*.sha256
+
+# Local audit / development files
+*.pre-static-audit-fixes
+*-static-audit.txt
+*.original
+*.failed-*
+*.pre-*
+.fuse_hidden*
+
+# Editor / OS debris
+*~
+*.swp
+.DS_Store
+Thumbs.db

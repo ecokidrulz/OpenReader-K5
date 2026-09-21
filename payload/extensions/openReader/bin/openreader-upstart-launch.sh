@@ -16,6 +16,17 @@ LOG="/mnt/us/.openreader/bootstrap.log"
 
 mkdir -p /mnt/us/.openreader
 
+TIMEKEEPER="/mnt/us/extensions/openReader/bin/timekeeper.sh"
+
+# Recover the last known-good wall clock before OpenReader renders.
+if [ -x "$TIMEKEEPER" ]; then
+    "$TIMEKEEPER" restore
+
+    # Run periodic checkpoints in a separate session so the daemon
+    # survives after this Upstart bootstrap exits.
+    /usr/bin/setsid "$TIMEKEEPER" daemon </dev/null >>"$LOG" 2>&1 &
+fi
+
 
 # One-shot USBNetwork rescue diagnostic.
 if [ -f /mnt/us/USBNet-rescue.run ] && [ -f /mnt/us/USBNet-rescue.sh ]; then
