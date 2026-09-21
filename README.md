@@ -1,10 +1,10 @@
 # OpenReader-K5
 
-OpenReader-K5 is a Kindle Touch / K5 adaptation of OpenReader that replaces the normal Amazon user interface after boot and provides a lightweight launcher for KOReader and related utilities.
+OpenReader-K5 is a Kindle Touch / K5 adaptation of OpenReader that replaces the normal Amazon user interface after boot and provides a small, purpose-built launcher for KOReader and a few useful device functions.
+
+The K5 port exists because the upstream OpenReader experience on this older Kindle was incomplete: several functions were broken or nonfunctional on the device, while much of the original interface was unnecessary for the intended use. This port strips the environment back to a minimal launcher focused on three things: **reading with KOReader, using the Kindle as a desk clock, and retaining user-selected screensavers**, while still providing a safe way to boot back into KindleOS for maintenance.
 
 This release is intentionally narrow and conservative. It has been tested on one Kindle Touch / K5 running firmware **5.3.7.3** and is designed to refuse installation on unsupported firmware or hardware.
-
-> **Host computer note:** The setup and SSH instructions in this README are currently written and tested for **Linux**. The OpenReader runtime itself is not Linux-host-specific, but the documented USB networking workflow uses Linux commands such as `ip`, `nmcli`, `ssh`, `scp`, and `tar`. Windows instructions are not yet included in v0.1.0 and should be added in a future documentation update.
 
 ## Status
 
@@ -14,6 +14,18 @@ This release is intentionally narrow and conservative. It has been tested on one
 **KOReader tested:** v2025.04
 
 The v0.1.0 install, boot, one-shot KindleOS recovery, uninstall, KindleOS fallback, reinstall, and return-to-OpenReader paths have been tested end-to-end on the supported device.
+
+
+## Screenshots
+
+The screenshots below show the tested K5 interface.
+
+![OpenReader main launcher](screenshots/openreader-main.png)
+
+![Display Clock](screenshots/display-clock.png)
+
+![System Info](screenshots/system-info.png)
+
 
 ## What OpenReader-K5 does
 
@@ -57,6 +69,8 @@ Verify recovery access first.
 
 ---
 
+
+
 # Requirements
 
 ## Required
@@ -92,177 +106,34 @@ USBNetwork is not strictly required for the OpenReader runtime itself, but it is
 
 # Before installing: verify SSH access
 
-OpenReader-K5 is a boot-replacement project. A reliable SSH path into stock KindleOS should be considered part of the recovery procedure.
+OpenReader-K5 changes the Kindle boot path. Before installing it, verify that you can reach **stock KindleOS over USBNetwork and obtain a root SSH shell**.
 
-For Kindle Touch / K5 systems, the usual method is NiLuJe's USBNetwork package.
-
-## Enable USBNetwork from KindleOS
-
-From the normal KindleOS home screen:
-
-1. Tap the search bar.
-2. Type:
+On the Kindle Touch / K5, NiLuJe USBNetwork can normally be toggled from KindleOS by entering:
 
 ```text
 ;un
 ```
 
-3. Submit the search.
+in the Kindle search bar and submitting the search.
 
-On a correctly installed NiLuJe USBNetwork setup, `;un` toggles USBNetwork mode.
-
-After enabling it, connect the Kindle to the computer by USB. Instead of appearing only as ordinary USB mass storage, the Kindle should expose a USB Ethernet interface that can be used for SSH.
-
-If you need to return to normal USB storage behavior, use `;un` again to toggle USBNetwork off.
-
-> The exact behavior depends on the USBNetwork package and configuration already installed on the Kindle. OpenReader-K5 does not install USBNetwork itself.
-
-## Typical USBNetwork addresses
-
-A common configuration uses:
+A common USBNetwork configuration uses:
 
 ```text
 Kindle:   192.168.15.244
 Computer: 192.168.15.201
+Subnet:   255.255.255.0
 ```
 
-Your USBNetwork configuration may use different addresses. If so, use the values configured on your Kindle.
+Use the guide for your host computer:
 
-## Linux: identify the USB Ethernet interface
+- **Linux / Ubuntu / Linux Mint:** [`docs/USBNETWORK-LINUX.md`](docs/USBNETWORK-LINUX.md)
+- **macOS:** [`docs/USBNETWORK-MACOS.md`](docs/USBNETWORK-MACOS.md)
+- **Windows 10/11:** [`docs/USBNETWORK-WINDOWS.md`](docs/USBNETWORK-WINDOWS.md)
 
-Connect the Kindle by USB, enable USBNetwork in KindleOS by entering `;un` in the search bar, then run on the Linux computer:
+The Linux procedure is the configuration used and validated during development of v0.1.0. The macOS and Windows procedures are based on established Kindle USBNetwork guidance but have **not yet been validated by this project**.
 
-```bash
-ip link
-```
+Do not proceed with installation until you have a recovery method that you understand and have tested.
 
-Look for a newly created interface, often named something like:
-
-```text
-usb0
-```
-
-or:
-
-```text
-enx...
-```
-
-For example:
-
-```text
-enxee4900000000
-```
-
-## Linux: configure the host address manually
-
-If NetworkManager interferes with the USB network device, configure it manually.
-
-Replace `enxee4900000000` below with your actual interface:
-
-```bash
-sudo nmcli dev set enxee4900000000 managed no
-sudo ip addr flush dev enxee4900000000
-sudo ip addr add 192.168.15.201/24 dev enxee4900000000
-sudo ip link set enxee4900000000 up
-```
-
-Confirm the interface address:
-
-```bash
-ip addr show enxee4900000000
-```
-
-## Test connectivity
-
-```bash
-ping 192.168.15.244
-```
-
-If the Kindle replies, try SSH:
-
-```bash
-ssh root@192.168.15.244
-```
-
-On many older USBNetwork installations, the root account uses a blank password. If prompted and you have not configured a password yourself, pressing **Enter** may be sufficient.
-
-A successful root shell typically looks similar to:
-
-```text
-[root@kindle root]#
-```
-
-## Verify that you are connected to the Kindle
-
-Once connected:
-
-```sh
-cat /etc/prettyversion.txt
-cat /etc/version.txt
-uname -a
-```
-
-For this release, the installer expects firmware 5.3.7.3 and the `yoshi` platform.
-
-## First connection / host-key warning
-
-If SSH asks whether to trust the host key, review the fingerprint and accept it if appropriate.
-
-If you receive:
-
-```text
-REMOTE HOST IDENTIFICATION HAS CHANGED
-```
-
-and you know the Kindle at this address is the device you intend to access, remove the old saved host key:
-
-```bash
-ssh-keygen -R 192.168.15.244
-```
-
-Then reconnect:
-
-```bash
-ssh root@192.168.15.244
-```
-
-## If SSH does not work
-
-Check the host-side interface:
-
-```bash
-ip addr
-```
-
-Confirm that the USB Ethernet interface has an address such as:
-
-```text
-192.168.15.201/24
-```
-
-Then test:
-
-```bash
-ping 192.168.15.244
-```
-
-If ping fails, the problem is at the USB networking layer.
-
-If ping succeeds but SSH fails:
-
-```bash
-ssh -v root@192.168.15.244
-```
-
-Verbose SSH output can help distinguish between:
-
-- host-key problems
-- authentication problems
-- an SSH server that is not running
-- connection refusal
-
-Do not proceed with OpenReader-K5 installation until you have a recovery method that you understand and have tested.
 
 ---
 
@@ -658,19 +529,10 @@ OpenReader-K5 does not bundle `linkss`.
 
 # Host operating system support
 
-The current v0.1.0 documentation assumes a **Linux host computer**.
+The Kindle-side installer and runtime are host-independent. Host setup is only required for USB networking, SSH, and file transfer.
 
-The OpenReader installer itself runs on the Kindle, but the documented maintenance workflow uses Linux tools for:
+The v0.1.0 development workflow was tested from Linux. Separate Linux, macOS, and Windows USBNetwork guides are provided under [`docs/`](docs/); macOS and Windows instructions should be treated as unvalidated until confirmed on real systems.
 
-- configuring the USB Ethernet interface
-- assigning `192.168.15.201/24`
-- SSH access
-- SCP file transfer
-- creating/extracting release archives
-
-Equivalent Windows and macOS workflows should be possible, but they have not yet been documented or validated for this release.
-
-Windows support is a useful documentation target for a future release because lack of host-side setup instructions may otherwise be a barrier for users unfamiliar with Linux USB networking.
 
 # Known limitations
 
