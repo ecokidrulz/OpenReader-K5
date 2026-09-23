@@ -1106,24 +1106,70 @@ poweroff_system() {
     /sbin/poweroff -f
 }
 
+# Show a short USB mode result/status page.
+show_usb_result() {
+    HEADING="$1"
+    LINE_ONE="$2"
+    LINE_TWO="$3"
+
+    $FBINK -c
+
+    $FBINK -x 2 -y 3 -h "$HEADING"
+    $FBINK -x 2 -y 5 "──────────────────────────────────"
+
+    $FBINK -x 2 -y 12 "$LINE_ONE"
+
+    if [ -n "$LINE_TWO" ]; then
+        $FBINK -x 2 -y 16 "$LINE_TWO"
+    fi
+
+    $FBINK -x 2 -y 34 "Returning to OpenReader..."
+
+    sleep 5
+}
+
+
 # Force USB Network mode without accidentally toggling it off.
 enable_usb_network() {
     USBNETWORK="/mnt/us/usbnet/bin/usbnetwork"
 
-    if [ ! -f "$USBNETWORK" ]; then
-        $FBINK -c
-        $FBINK -x 2 -y 15 -h "USBNetwork not installed"
-        sleep 2
+    if lsmod | grep -q '^g_ether ' ; then
+        show_usb_result \
+            "NETWORK ACTIVE" \
+            "USBNetwork is already enabled." \
+            "SSH remains available."
         return
     fi
 
-    # NiLuJe USBNetwork uses g_ether as its own mode test.
-    if lsmod | grep -q g_ether ; then
+    if [ ! -f "$USBNETWORK" ]; then
+        show_usb_result \
+            "NETWORK UNAVAILABLE" \
+            "USBNetwork script was not found." \
+            "No USB mode change was made."
         return
     fi
+
+    $FBINK -c
+    $FBINK -x 2 -y 3 -h "ENABLING USB NETWORK"
+    $FBINK -x 2 -y 5 "──────────────────────────────────"
+    $FBINK -x 2 -y 14 "Connect the USB cable for SSH."
 
     chmod +x "$USBNETWORK" 2>/dev/null
     "$USBNETWORK"
+
+    sleep 2
+
+    if lsmod | grep -q '^g_ether ' ; then
+        show_usb_result \
+            "NETWORK ENABLED" \
+            "USB Ethernet is active." \
+            "Connect the cable to use SSH."
+    else
+        show_usb_result \
+            "NETWORK FAILED" \
+            "USB Ethernet did not become active." \
+            "No further change was attempted."
+    fi
 }
 
 
@@ -1131,20 +1177,57 @@ enable_usb_network() {
 enable_usb_storage() {
     USBNETWORK="/mnt/us/usbnet/bin/usbnetwork"
 
+    if ! lsmod | grep -q '^g_ether ' ; then
+        show_usb_result \
+            "STORAGE MODE" \
+            "USBNetwork is already inactive." \
+            "Reconnect or unplug as needed."
+        return
+    fi
+
     if [ ! -f "$USBNETWORK" ]; then
-        $FBINK -c
-        $FBINK -x 2 -y 15 -h "USBNetwork not installed"
-        sleep 2
+        show_usb_result \
+            "STORAGE UNAVAILABLE" \
+            "USBNetwork script was not found." \
+            "No USB mode change was made."
         return
     fi
 
-    # Already in mass-storage mode: nothing to do.
-    if ! lsmod | grep -q g_ether ; then
-        return
-    fi
+    $FBINK -c
 
+    $FBINK -x 2 -y 3 -h "USB STORAGE"
+    $FBINK -x 2 -y 5 "──────────────────────────────────"
+
+    $FBINK -x 2 -y 11 "SSH will disconnect."
+    $FBINK -x 2 -y 15 "Safely eject on the computer,"
+    $FBINK -x 2 -y 18 "then unplug the USB cable."
+
+    $FBINK -x 2 -y 34 "OpenReader will return automatically."
+
+    sync
     chmod +x "$USBNETWORK" 2>/dev/null
     "$USBNETWORK" usbms
+
+    # USB mass-storage mode may temporarily remove /mnt/us.
+    # Use only root-filesystem commands until userstore returns.
+    while ! awk '$2 == "/mnt/us" { found=1 } END { exit !found }' \
+              /proc/mounts 2>/dev/null; do
+        sleep 2
+    done
+
+    sleep 2
+
+    if lsmod | grep -q '^g_ether ' ; then
+        show_usb_result \
+            "STORAGE FAILED" \
+            "USB mass storage did not activate." \
+            "USBNetwork remains enabled."
+    else
+        show_usb_result \
+            "STORAGE EJECTED" \
+            "User storage is available again." \
+            "Tap Net to restore USB networking."
+    fi
 }
 
 
