@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# OpenReader-K5 v0.1.0 automatic-boot uninstaller
+# OpenReader-K5 v0.1.2 automatic-boot uninstaller
 #
 # Removes OpenReader's Upstart integration so the next reboot starts
 # normal KindleOS.
