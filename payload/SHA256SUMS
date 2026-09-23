@@ -1,4 +1,4 @@
-a9a81b8197842162306eba0f978e0863e4a891c08d970daa447ed194521c9957  payload/extensions/openReader/bin/boot-replacement.sh
+fd203936df0e2c75cbe4f860aa93a8d3a3c9f79fd9fd4765e6476a37b35e7522  payload/extensions/openReader/bin/boot-replacement.sh
 7cb5a641265b6436c7a1cf86c7fb398441c8729027c997604bbdd051d50fb408  payload/extensions/openReader/bin/clock-updater.sh
 076512cc336fc257bf16fec4a04509acfb6944ba45b504995298569447a6d8cd  payload/extensions/openReader/bin/display-clock.sh
 624a9bd210799aff7e4d28e4f67ba81f631b6f559ab977b156b9eef3366fa92c  payload/extensions/openReader/bin/openreader-upstart-launch.sh

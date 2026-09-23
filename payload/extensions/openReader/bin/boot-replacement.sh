@@ -104,7 +104,7 @@ timed_stop lab126_gui
 timed_stop framework
 timed_stop pillow
 timed_stop blanket
-timed_stop cmd
+# timed_stop cmd  # retained for Wi-Fi routing/DNS
 timed_stop phd
 timed_stop pmond
 timed_stop tmd
