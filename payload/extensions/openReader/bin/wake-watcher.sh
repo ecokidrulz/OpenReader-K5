@@ -1,6 +1,7 @@
 #!/bin/sh
 
 REDRAW="/mnt/us/extensions/openReader/bin/redraw-openreader.sh"
+EPDC_RESUME="/mnt/us/extensions/openReader/bin/epdc-resume.sh"
 PIDFILE="/var/tmp/openreader-wake-watcher.pid"
 LOG="/mnt/us/.openreader/wake-watcher.log"
 
@@ -62,6 +63,13 @@ while true; do
 
             # Give the framebuffer/power stack a moment to settle.
             sleep 1
+
+            # K5 may return from suspend with the EPDC framebuffer
+            # becoming paused shortly after powerd reports Active.
+            # Guard the first 10 seconds without delaying the repaint.
+            if [ -x "$EPDC_RESUME" ]; then
+                "$EPDC_RESUME" 10 >> "$LOG" 2>&1 &
+            fi
 
             "$REDRAW"
         else

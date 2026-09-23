@@ -924,39 +924,41 @@ show_settings_toolbar() {
 
 # Confirmation dialog: boot stock KindleOS once
 confirm_boot_kindleos_once() {
+    echo "CONFIRM" > /var/tmp/openreader-screen
     $FBINK -c
 
-    $FBINK -x 2 -y 6 -h "BOOT KINDLEOS ONCE"
-    $FBINK -x 2 -y 8 "──────────────────────────────────"
+    $FBINK -x 2 -y 3 -h "BOOT KINDLEOS ONCE?"
+    $FBINK -x 2 -y 5 "──────────────────────────────────"
 
-    $FBINK -x 2 -y 12 "Restart into the original"
-    $FBINK -x 2 -y 14 "Amazon Kindle interface?"
+    $FBINK -x 2 -y 10 "Exit OpenReader runtime?"
+    $FBINK -x 2 -y 14 "The Amazon interface will return."
+    $FBINK -x 2 -y 18 "Cancel returns to OpenReader."
 
-    $FBINK -x 2 -y 18 "OpenReader will return after"
-    $FBINK -x 2 -y 20 "the next reboot."
-
-    $FBINK -x 2 -y 28 "Boot KindleOS"
-    $FBINK -x 2 -y 36 "Cancel"
-
+    $FBINK -x 2 -y 40 "──────────────────────────────────"
+    $FBINK -x 2 -y 43 -h "Cancel"
+    $FBINK -x 22 -y 43 -h "Boot KindleOS"
 
     while true; do
         COORDS=$("$TOUCH_READER" /dev/input/event3 2>/dev/null)
-
         [ -z "$COORDS" ] && continue
 
+        RAW_X=$(echo "$COORDS" | cut -d',' -f1)
         RAW_Y=$(echo "$COORDS" | cut -d',' -f2)
+
+        X=$((RAW_X * 600 / 4095))
         Y=$((RAW_Y * 800 / 4095))
 
-        if [ "$Y" -ge 390 ] && [ "$Y" -lt 555 ]; then
-            $FBINK -x 2 -y 28 -h "Boot KindleOS"
-            sleep 0.5
-            boot_kindleos_once
-            return
-
-        elif [ "$Y" -ge 555 ] && [ "$Y" -lt 690 ]; then
-            $FBINK -x 2 -y 36 -h "Cancel"
-            sleep 0.5
-            return
+        if [ "$Y" -ge 690 ]; then
+            if [ "$X" -lt 300 ]; then
+                $FBINK -x 2 -y 43 -h "Cancel"
+                sleep 0.5
+                return
+            else
+                $FBINK -x 22 -y 43 -h "Boot KindleOS"
+                sleep 0.5
+                boot_kindleos_once
+                return
+            fi
         fi
     done
 }
@@ -967,39 +969,84 @@ confirm_reboot() {
     echo "CONFIRM" > /var/tmp/openreader-screen
     $FBINK -c
 
-    $FBINK -x 2 -y 6 -h "REBOOT"
-    $FBINK -x 2 -y 8 "──────────────────────────────────"
+    $FBINK -x 2 -y 3 -h "REBOOT TO OPENREADER?"
+    $FBINK -x 2 -y 5 "──────────────────────────────────"
 
-    $FBINK -x 2 -y 13 "Restart the Kindle now?"
+    $FBINK -x 2 -y 10 "Restart the Kindle now?"
+    $FBINK -x 2 -y 14 "OpenReader should start again."
+    $FBINK -x 2 -y 18 "Cancel returns to OpenReader."
 
-    $FBINK -x 2 -y 18 "OpenReader will start again"
-    $FBINK -x 2 -y 20 "automatically."
-
-    $FBINK -x 2 -y 28 "Reboot"
-    $FBINK -x 2 -y 36 "Cancel"
-
+    $FBINK -x 2 -y 40 "──────────────────────────────────"
+    $FBINK -x 2 -y 43 -h "Cancel"
+    $FBINK -x 28 -y 43 -h "Reboot"
 
     while true; do
         COORDS=$("$TOUCH_READER" /dev/input/event3 2>/dev/null)
-
         [ -z "$COORDS" ] && continue
 
+        RAW_X=$(echo "$COORDS" | cut -d',' -f1)
         RAW_Y=$(echo "$COORDS" | cut -d',' -f2)
+
+        X=$((RAW_X * 600 / 4095))
         Y=$((RAW_Y * 800 / 4095))
 
-        if [ "$Y" -ge 390 ] && [ "$Y" -lt 555 ]; then
-            $FBINK -x 2 -y 28 -h "Reboot"
-            sleep 0.5
-            reboot_system
-            return
-
-        elif [ "$Y" -ge 555 ] && [ "$Y" -lt 690 ]; then
-            $FBINK -x 2 -y 36 -h "Cancel"
-            sleep 0.5
-            return
+        if [ "$Y" -ge 690 ]; then
+            if [ "$X" -lt 300 ]; then
+                $FBINK -x 2 -y 43 -h "Cancel"
+                sleep 0.5
+                return
+            else
+                $FBINK -x 28 -y 43 -h "Reboot"
+                sleep 0.5
+                reboot_system
+                return
+            fi
         fi
     done
 }
+
+
+# Confirmation dialog: power off
+confirm_poweroff() {
+    echo "CONFIRM" > /var/tmp/openreader-screen
+    $FBINK -c
+
+    $FBINK -x 2 -y 3 -h "POWER OFF?"
+    $FBINK -x 2 -y 5 "──────────────────────────────────"
+
+    $FBINK -x 2 -y 10 "Turn the Kindle completely off?"
+    $FBINK -x 2 -y 14 "Press power to start it again."
+    $FBINK -x 2 -y 18 "Cancel returns to OpenReader."
+
+    $FBINK -x 2 -y 40 "──────────────────────────────────"
+    $FBINK -x 2 -y 43 -h "Cancel"
+    $FBINK -x 25 -y 43 -h "Power Off"
+
+    while true; do
+        COORDS=$("$TOUCH_READER" /dev/input/event3 2>/dev/null)
+        [ -z "$COORDS" ] && continue
+
+        RAW_X=$(echo "$COORDS" | cut -d',' -f1)
+        RAW_Y=$(echo "$COORDS" | cut -d',' -f2)
+
+        X=$((RAW_X * 600 / 4095))
+        Y=$((RAW_Y * 800 / 4095))
+
+        if [ "$Y" -ge 690 ]; then
+            if [ "$X" -lt 300 ]; then
+                $FBINK -x 2 -y 43 -h "Cancel"
+                sleep 0.5
+                return
+            else
+                $FBINK -x 25 -y 43 -h "Power Off"
+                sleep 0.5
+                poweroff_system
+                return
+            fi
+        fi
+    done
+}
+
 
 # Boot stock KindleOS for one boot only
 boot_kindleos_once() {
@@ -1040,10 +1087,14 @@ reboot_system() {
 poweroff_system() {
     $FBINK -c
 
-    $FBINK -x 8 -y 13 "        /\\ /\\"
-    $FBINK -x 8 -y 15 " Zzz...(-.- )____   Zzz..."
-    $FBINK -x 8 -y 17 "       (_________)~"
-    $FBINK -x 8 -y 19 "~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    $FBINK -x 2 -y 5 -h "OPENREADER-K5"
+
+    $FBINK -x 6 -y 15 "        /\\ /\\"
+    $FBINK -x 6 -y 17 " Zzz...(-.- )____   Zzz..."
+    $FBINK -x 6 -y 19 "       (_________)~"
+    $FBINK -x 6 -y 21 "~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+    $FBINK -x 2 -y 34 -h "Press power to wake"
 
     echo "POWEROFF" > /var/tmp/openreader-state
 
@@ -1164,7 +1215,9 @@ main() {
             toolbar_poweroff)
                 draw_menu "toolbar_poweroff"
                 sleep 0.5
-                poweroff_system
+                confirm_poweroff
+                CURRENT_SELECTION=""
+                continue
                 ;;
         esac
 

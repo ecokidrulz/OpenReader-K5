@@ -292,6 +292,15 @@ cd "$LAUNCHER_DIR" || exit 0
 
 # Launch OpenReader
 log_msg "Launching OpenReader (initial start)..."
+
+# K5 can occasionally reach OpenReader startup while the EPDC
+# pause state is still changing. Guard the first 10 seconds
+# without delaying the initial OpenReader paint.
+EPDC_RESUME="$LAUNCHER_DIR/epdc-resume.sh"
+if [ -x "$EPDC_RESUME" ]; then
+    "$EPDC_RESUME" 10 >> "$LOG_FILE" 2>&1 &
+fi
+
 "$LAUNCHER_SCRIPT" &
 
 # Re-establish NiLuJe custom screensaver mount.
