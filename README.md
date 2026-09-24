@@ -8,12 +8,12 @@ This release is intentionally narrow and conservative. It has been tested on one
 
 ## Status
 
-**Release:** v0.1.2
+**Release:** v0.1.3
 **Tested device:** Kindle Touch / K5 (`yoshi`)
 **Tested firmware:** Kindle 5.3.7.3
 **KOReader tested:** v2025.04
 
-The v0.1.2 install, boot, one-shot KindleOS recovery, uninstall, KindleOS fallback, reinstall, and return-to-OpenReader paths have been tested end-to-end on the supported device.
+The v0.1.3 install, boot, one-shot KindleOS recovery, uninstall, KindleOS fallback, reinstall, and return-to-OpenReader paths have been tested end-to-end on the supported device.
 
 ## Tested working
 
@@ -162,7 +162,7 @@ Use the guide for your host computer:
 - **macOS:** [`docs/USBNETWORK-MACOS.md`](docs/USBNETWORK-MACOS.md)
 - **Windows 10/11:** [`docs/USBNETWORK-WINDOWS.md`](docs/USBNETWORK-WINDOWS.md)
 
-The Linux procedure is the configuration used and validated during development of v0.1.2. The macOS and Windows procedures are based on established Kindle USBNetwork guidance but have **not yet been validated by this project**.
+The Linux procedure is the configuration used and validated during development of v0.1.3. The macOS and Windows procedures are based on established Kindle USBNetwork guidance but have **not yet been validated by this project**.
 
 Do not proceed with installation until you have a recovery method that you understand and have tested.
 
@@ -210,7 +210,7 @@ Place the release directory somewhere outside:
 For example:
 
 ```text
-/mnt/us/openreader-k5-v0.1.2
+/mnt/us/openreader-k5-v0.1.3
 ```
 
 Do not run the installer from inside the active OpenReader installation directory.
@@ -220,7 +220,7 @@ Do not run the installer from inside the active OpenReader installation director
 Example:
 
 ```sh
-cd /mnt/us/openreader-k5-v0.1.2
+cd /mnt/us/openreader-k5-v0.1.3
 ```
 
 ## 5. Syntax-check the installer
@@ -339,7 +339,7 @@ If repeated OpenReader initialization failures occur before the critical boot se
 
 # Uninstalling automatic OpenReader boot
 
-The v0.1.2 uninstaller disables automatic OpenReader startup but intentionally retains the OpenReader and KOReader files.
+The v0.1.3 uninstaller disables automatic OpenReader startup but intentionally retains the OpenReader and KOReader files.
 
 ## 1. Boot KindleOS once
 
@@ -362,7 +362,7 @@ ssh root@192.168.15.244
 Example:
 
 ```sh
-cd /mnt/us/openreader-k5-v0.1.2
+cd /mnt/us/openreader-k5-v0.1.3
 ```
 
 ## 4. Syntax-check
@@ -416,7 +416,7 @@ The Kindle should now remain in stock KindleOS.
 While in KindleOS:
 
 ```sh
-cd /mnt/us/openreader-k5-v0.1.2
+cd /mnt/us/openreader-k5-v0.1.3
 sh ./install.sh
 ```
 
@@ -461,7 +461,7 @@ and the installed OpenReader-K5 version in:
 
 # OpenReader interface
 
-The v0.1.2 launcher currently includes:
+The v0.1.3 launcher currently includes:
 
 ```text
 KOReader
@@ -567,14 +567,14 @@ OpenReader-K5 does not bundle `linkss`.
 
 The Kindle-side installer and runtime are host-independent. Host setup is only required for USB networking, SSH, and file transfer.
 
-The v0.1.2 development workflow was tested from Linux. Separate Linux, macOS, and Windows USBNetwork guides are provided under [`docs/`](docs/); macOS and Windows instructions should be treated as unvalidated until confirmed on real systems.
+The v0.1.3 development workflow was tested from Linux. Separate Linux, macOS, and Windows USBNetwork guides are provided under [`docs/`](docs/); macOS and Windows instructions should be treated as unvalidated until confirmed on real systems.
 
 
 # Known limitations
 
 ## Device support
 
-v0.1.2 is intentionally restricted to:
+v0.1.3 is intentionally restricted to:
 
 ```text
 Kindle Touch / K5
@@ -636,7 +636,7 @@ tail -n 100 /mnt/us/.openreader/debug.log 2>/dev/null
 5. To disable automatic OpenReader boot, run:
 
 ```sh
-cd /mnt/us/openreader-k5-v0.1.2
+cd /mnt/us/openreader-k5-v0.1.3
 sh ./uninstall.sh
 sync
 /sbin/reboot
@@ -708,18 +708,18 @@ This approach was chosen because it proved substantially more stable on Kindle T
 
 ---
 
-# Tested v0.1.2 lifecycle
+# Tested v0.1.3 lifecycle
 
 The following sequence has been tested successfully on the supported K5:
 
 ```text
 existing development installation
-→ install v0.1.2
+→ install v0.1.3
 → boot OpenReader
 → Boot KindleOS Once
 → uninstall automatic OpenReader boot
 → reboot into KindleOS
-→ reinstall v0.1.2
+→ reinstall v0.1.3
 → reboot
 → OpenReader returns
 ```
@@ -760,7 +760,7 @@ Those projects remain separate and are not bundled unless explicitly stated.
 # Version
 
 ```text
-OpenReader-K5 v0.1.2
+OpenReader-K5 v0.1.3
 Kindle Touch / K5
 Firmware 5.3.7.3
 ```

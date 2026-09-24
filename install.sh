@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# OpenReader-K5 v0.1.2 installer
+# OpenReader-K5 v0.1.3 installer
 #
 # Supported target:
 #   Kindle Touch / K5 (yoshi)
@@ -15,7 +15,7 @@
 # The installer never reboots automatically.
 #
 
-VERSION="0.1.2"
+VERSION="0.1.3"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PAYLOAD="$SCRIPT_DIR/payload"

@@ -6,7 +6,7 @@ SCRIPT_DIR="$(dirname "$0")"
 FBINK="/mnt/us/koreader/fbink"
 TOUCH_READER="$SCRIPT_DIR/touch_reader"
 [ ! -f "$FBINK" ] && FBINK="/usr/bin/fbink"
-OPENREADER_K5_VERSION="0.1.2"
+OPENREADER_K5_VERSION="0.1.3"
 
 
 # Global state variables
